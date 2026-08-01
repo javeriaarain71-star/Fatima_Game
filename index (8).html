@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Little Princess Learning Adventure</title>
+    <style>
+        :root {
+            --primary-pink: #FF85A2;
+            --soft-pink: #FFC2D1;
+            --light-pink: #FFE5EC;
+            --purple-accent: #B5179E;
+            --soft-purple: #7209B7;
+            --soft-yellow: #FFD166;
+            --soft-blue: #A2D2FF;
+            --soft-green: #CAFFBF;
+            --white: #FFFFFF;
+            --dark-text: #4A0E17;
+            --card-shadow: 0 10px 20px rgba(255, 133, 162, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            margin: 0;
+            padding: 0;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Fredoka One', cursive, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #FFE5EC 0%, #E8AEB7 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            color: var(--dark-text);
+        }
+
+        #game-container {
+            width: 100vw;
+            height: 100vh;
+            max-width: 900px;
+            max-height: 650px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 6px solid var(--primary-pink);
+        }
+
+        /* Animated Background Elements */
+        .bg-element {
+            position: absolute;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.6;
+        }
+
+        .cloud {
+            background: white;
+            border-radius: 50px;
+            position: absolute;
+            animation: floatCloud 25s linear infinite;
+        }
+
+        @keyframes floatCloud {
+            0% { transform: translateX(-150px); }
+            100% { transform: translateX(1000px); }
+        }
+
+        /* Top Header Navigation & Stats */
+        header {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-bottom: 3px solid var(--soft-pink);
+        }
+
+        .user-stats {
+            display: flex;
+            gap: 15px;
+        }
+
+        .stat-badge {
+            background: var(--light-pink);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--purple-accent);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 2px solid var(--primary-pink);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .nav-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 2px solid var(--primary-pink);
+            background: white;
+            color: var(--purple-accent);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.1s, background 0.2s;
+        }
+
+        .icon-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* Screens Management */
+        .screen {
+            position: relative;
+            z-index: 5;
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+            overflow-y: auto;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* Splash Screen */
+        #loading-screen {
+            background: linear-gradient(135deg, #FFC2D1, #FFE5EC);
+        }
+
+        .title-banner {
+            font-size: 2.5rem;
+            color: var(--purple-accent);
+            text-shadow: 3px 3px 0px var(--white), 5px 5px 0px var(--soft-pink);
+            margin-bottom: 20px;
+            animation: pulse 2s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.98); }
+            100% { transform: scale(1.03); }
+        }
+
+        .big-btn {
+            background: linear-gradient(180deg, #FF85A2 0%, #B5179E 100%);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            font-size: 1.6rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(181, 23, 158, 0.4);
+            transition: transform 0.1s;
+            border: 4px solid white;
+        }
+
+        .big-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Main Menu Grid */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat( auto-fit, minmax(130px, 1fr) );
+            gap: 15px;
+            width: 100%;
+            max-width: 750px;
+            margin-top: 10px;
+        }
+
+        .activity-card {
+            background: white;
+            border: 3px solid var(--soft-pink);
+            border-radius: 20px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .activity-card:hover, .activity-card:active {
+            transform: translateY(-5px);
+            border-color: var(--purple-accent);
+        }
+
+        .activity-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+        }
+
+        .activity-card .label {
+            font-weight: bold;
+            font-size: 1rem;
+            color: var(--dark-text);
+        }
+
+        /* Common Learning Display Area */
+        .prompt-title {
+            font-size: 1.8rem;
+            color: var(--purple-accent);
+            margin-bottom: 15px;
+        }
+
+        .options-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        .choice-btn {
+            background: white;
+            border: 4px solid var(--soft-pink);
+            border-radius: 20px;
+            min-width: 80px;
+            min-height: 80px;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--dark-text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            transition: transform 0.1s, background-color 0.2s;
+        }
+
+        .choice-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* Puzzle Game Specifics */
+        .puzzle-board {
+            display: grid;
+            grid-template-columns: repeat(2, 120px);
+            gap: 10px;
+            background: var(--light-pink);
+            padding: 10px;
+            border-radius: 15px;
+            border: 3px dashed var(--primary-pink);
+        }
+
+        .puzzle-slot {
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.5);
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .puzzle-piece {
+            width: 100px;
+            height: 100px;
+            background: var(--soft-yellow);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            cursor: grab;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        /* Memory Game Grid */
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 70px);
+            gap: 10px;
+        }
+
+        .memory-card {
+            width: 70px;
+            height: 90px;
+            background: var(--primary-pink);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: transform 0.3s;
+        }
+
+        .memory-card.flipped {
+            background: white;
+            border: 2px solid var(--primary-pink);
+            transform: rotateY(180deg);
+        }
+
+        /* Balloon Pop Game Canvas Elements */
+        #balloon-canvas {
+            width: 100%;
+            height: 350px;
+            background: linear-gradient(180deg, #A2D2FF 0%, #FFE5EC 100%);
+            border-radius: 20px;
+            border: 3px solid var(--soft-pink);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .balloon {
+            position: absolute;
+            width: 60px;
+            height: 75px;
+            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.1);
+            animation: floatUp 6s linear forwards;
+        }
+
+        .balloon::after {
+            content: "";
+            position: absolute;
+            bottom: -8px;
+            left: 28px;
+            width: 2px;
+            height: 10px;
+            background: #888;
+        }
+
+        @keyframes floatUp {
+            0% { bottom: -80px; }
+            100% { bottom: 380px; }
+        }
+
+        /* Canvas Particle Effects Layer */
+        #effect-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* Modal Overlays */
+        .modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 25px;
+            text-align: center;
+            max-width: 80%;
+            border: 5px solid var(--primary-pink);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 600px) {
+            .title-banner { font-size: 1.8rem; }
+            .menu-grid { grid-template-columns: repeat(2, 1fr); }
+            .choice-btn { min-width: 65px; min-height: 65px; font-size: 1.8rem; }
+            .memory-grid { grid-template-columns: repeat(4, 60px); }
+            .memory-card { width: 60px; height: 75px; font-size: 1.5rem; }
+            .puzzle-board { grid-template-columns: repeat(2, 90px); }
+            .puzzle-slot, .puzzle-piece { width: 90px; height: 90px; font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <canvas id="effect-canvas"></canvas>
+
+        <!-- Top Header Navigation -->
+        <header>
+            <div class="user-stats">
+                <div class="stat-badge">⭐ <span id="star-count">0</span></div>
+                <div class="stat-badge">🪙 <span id="coin-count">0</span></div>
+            </div>
+            <div class="nav-controls">
+                <button class="icon-btn" id="btn-home" onclick="showScreen('menu-screen')">🏠</button>
+                <button class="icon-btn" id="btn-audio" onclick="toggleAudio()">🔊</button>
+                <button class="icon-btn" id="btn-parents" onclick="openParentsModal()">⚙️</button>
+            </div>
+        </header>
+
+        <!-- Screen 0: Loading/Splash -->
+        <div id="loading-screen" class="screen active">
+            <h1 class="title-banner">👑 Little Princess<br>Learning Adventure</h1>
+            <div style="font-size: 4rem; margin: 20px;">🦄 ✨ 🎈</div>
+            <button class="big-btn" onclick="startGame()">PLAY NOW!</button>
+        </div>
+
+        <!-- Screen 1: Main Menu -->
+        <div id="menu-screen" class="screen">
+            <h2 style="color: var(--purple-accent); margin-bottom: 10px;">Select an Activity</h2>
+            <div class="menu-grid">
+                <div class="activity-card" onclick="startActivity('abc')">
+                    <div class="icon">🔤</div>
+                    <div class="label">ABC Learning</div>
+                </div>
+                <div class="activity-card" onclick="startActivity('numbers')">
+                    <div class="icon">🔢</div>
+                    <div class="label">123 Numbers</div>
+                </div>
+                <div class="activity-card" onclick="startActivity('colors')">
+                    <div class="icon">🎨</div>
+                    <div class="label">Colors</div>
+                </div>
+                <div class="activity-card" onclick="startActivity('shapes')">
+                    <div class="icon">📐</div>
+                    <div class="label">Shapes</div>
+                </div>
+                <div class="activity-card" onclick="startActivity('animals')">
+                    <div class="icon">🐱</div>
+                    <div class="label">Animals</div>
+                </div>
+                <div class="activity-card" onclick="startActivity('fruits')">
+                    <div class="icon">🍎</div>
+                    <div class="label">Fruits</div>
+                </div>
+                <div class="activity-card" onclick="startActivity('puzzle')">
+                    <div class="icon">🧩</div>
+                    <div class="label">Puzzle</div>
+                </div>
+                <div class="activity-card" onclick="startActivity('memory')">
+                    <div class="icon">🃏</div>
+                    <div class="label">Memory Game</div>
+                </div>
+                <div class="activity-card" onclick="startActivity('balloon')">
+                    <div class="icon">🎈</div>
+                    <div class="label">Balloon Pop</div>
+                </div>
+                <div class="activity-card" onclick="startActivity('stickers')">
+                    <div class="icon">🏆</div>
+                    <div class="label">My Rewards</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 2: Generic Quiz Activity View -->
+        <div id="quiz-screen" class="screen">
+            <div id="quiz-prompt" class="prompt-title">Find the Letter</div>
+            <div id="quiz-visual" style="font-size: 5rem; margin: 10px;"></div>
+            <div id="quiz-options" class="options-container"></div>
+        </div>
+
+        <!-- Screen 3: Mini Puzzle Screen -->
+        <div id="puzzle-screen" class="screen">
+            <div class="prompt-title">Drag Pieces to Match</div>
+            <div style="display: flex; gap: 20px; align-items: center; justify-content: center; flex-wrap: wrap;">
+                <div id="puzzle-pieces" style="display: flex; gap: 10px;"></div>
+                <div id="puzzle-board" class="puzzle-board"></div>
+            </div>
+        </div>
+
+        <!-- Screen 4: Memory Card Game Screen -->
+        <div id="memory-screen" class="screen">
+            <div class="prompt-title">Match the Pairs!</div>
+            <div id="memory-board" class="memory-grid"></div>
+        </div>
+
+        <!-- Screen 5: Balloon Pop Game Screen -->
+        <div id="balloon-screen" class="screen">
+            <div id="balloon-prompt" class="prompt-title">Pop the Balloon with: A</div>
+            <div id="balloon-canvas"></div>
+        </div>
+
+        <!-- Screen 6: Rewards / Sticker Book Screen -->
+        <div id="rewards-screen" class="screen">
+            <div class="prompt-title">My Sticker Collection</div>
+            <div id="sticker-grid" style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: center;"></div>
+        </div>
+
+        <!-- Parents Gate / Reset Modal -->
+        <div id="parents-modal" class="modal">
+            <div class="modal-content">
+                <h2>Grown-ups Only</h2>
+                <p style="margin: 15px 0;">To access settings or reset progress, answer:</p>
+                <p id="math-problem" style="font-size: 1.5rem; font-weight: bold; margin-bottom: 10px;"></p>
+                <input type="number" id="math-answer" style="font-size: 1.2rem; width: 80px; text-align: center; margin-bottom: 15px;">
+                <div>
+                    <button class="big-btn" style="padding: 8px 20px; font-size: 1rem;" onclick="verifyParentsGate()">Submit</button>
+                    <button class="big-btn" style="padding: 8px 20px; font-size: 1rem; background: gray;" onclick="closeParentsModal()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ==========================================================================
+           1. GAME STATE & LOCAL STORAGE MANAGEMENT
+           ========================================================================== */
+        const gameState = {
+            stars: 0,
+            coins: 0,
+            stickersUnlocked: [],
+            audioMuted: false
+        };
+
+        function loadSavedProgress() {
+            const saved = localStorage.getItem('princess_game_save');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    gameState.stars = parsed.stars || 0;
+                    gameState.coins = parsed.coins || 0;
+                    gameState.stickersUnlocked = parsed.stickersUnlocked || [];
+                } catch(e) { console.error("Error loading save data", e); }
+            }
+            updateStatsUI();
+        }
+
+        function saveProgress() {
+            localStorage.setItem('princess_game_save', JSON.stringify({
+                stars: gameState.stars,
+                coins: gameState.coins,
+                stickersUnlocked: gameState.stickersUnlocked
+            }));
+            updateStatsUI();
+        }
+
+        function updateStatsUI() {
+            document.getElementById('star-count').innerText = gameState.stars;
+            document.getElementById('coin-count').innerText = gameState.coins;
+        }
+
+        function addRewards(stars, coins) {
+            gameState.stars += stars;
+            gameState.coins += coins;
+            saveProgress();
+            triggerConfetti();
+            playSound('correct');
+        }
+
+        /* ==========================================================================
+           2. AUDIO SYNTHESIS & SPEECH SYSTEM (No external dependencies)
+           ========================================================================== */
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioContext();
+            }
+        }
+
+        function playSound(type) {
+            if (gameState.audioMuted) return;
+            initAudio();
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'click') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+                osc.start(now);
+                osc.stop(now + 0.05);
+            } else if (type === 'correct') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(200, now);
+                osc.frequency.linearRampToValueAtTime(100, now + 0.2);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            } else if (type === 'pop') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, now);
+                osc.frequency.exponentialRampToValueAtTime(200, now + 0.08);
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
+                osc.start(now);
+                osc.stop(now + 0.08);
+            }
+        }
+
+        function speak(text) {
+            if (gameState.audioMuted) return;
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Stop overlap
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.pitch = 1.3; // Cute higher pitch
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function toggleAudio() {
+            gameState.audioMuted = !gameState.audioMuted;
+            document.getElementById('btn-audio').innerText = gameState.audioMuted ? '🔇' : '🔊';
+        }
+
+        /* ==========================================================================
+           3. UI SCREEN & NAVIGATION
+           ========================================================================== */
+        function showScreen(screenId) {
+            playSound('click');
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            if(balloonInterval) clearInterval(balloonInterval);
+        }
+
+        function startGame() {
+            initAudio();
+            showScreen('menu-screen');
+            speak("Welcome Little Princess! Pick a game!");
+        }
+
+        /* ==========================================================================
+           4. DATA DEFINITIONS FOR ACTIVITIES
+           ========================================================================== */
+        const gameData = {
+            abc: [
+                { item: 'A', name: 'A' }, { item: 'B', name: 'B' }, { item: 'C', name: 'C' },
+                { item: 'D', name: 'D' }, { item: 'E', name: 'E' }, { item: 'F', name: 'F' }
+            ],
+            numbers: [
+                { item: '1', visual: '🌸', count: 1 },
+                { item: '2', visual: '🌸🌸', count: 2 },
+                { item: '3', visual: '🌸🌸🌸', count: 3 },
+                { item: '4', visual: '🌸🌸🌸🌸', count: 4 }
+            ],
+            colors: [
+                { item: '💖', name: 'Pink', color: '#FF85A2' },
+                { item: '💛', name: 'Yellow', color: '#FFD166' },
+                { item: '💙', name: 'Blue', color: '#A2D2FF' },
+                { item: '💚', name: 'Green', color: '#CAFFBF' }
+            ],
+            shapes: [
+                { item: '🔴', name: 'Circle' },
+                { item: '🟦', name: 'Square' },
+                { item: '🔺', name: 'Triangle' },
+                { item: '⭐', name: 'Star' },
+                { item: '💖', name: 'Heart' }
+            ],
+            animals: [
+                { item: '🐱', name: 'Cat', sound: 'Meow' },
+                { item: '🐶', name: 'Dog', sound: 'Woof' },
+                { item: '🐰', name: 'Bunny', sound: 'Hop hop' },
+                { item: '🦄', name: 'Unicorn', sound: 'Neigh' }
+            ],
+            fruits: [
+                { item: '🍎', name: 'Apple' },
+                { item: '🍌', name: 'Banana' },
+                { item: '🍓', name: 'Strawberry' },
+                { item: '🍇', name: 'Grapes' }
+            ]
+        };
+
+        /* ==========================================================================
+           5. GENERIC QUIZ ENGINE (ABC, Numbers, Colors, Shapes, Animals, Fruits)
+           ========================================================================== */
+        let currentQuizCorrect = null;
+
+        function startActivity(type) {
+            if (type === 'puzzle') return setupPuzzleGame();
+            if (type === 'memory') return setupMemoryGame();
+            if (type === 'balloon') return setupBalloonGame();
+            if (type === 'stickers') return setupStickerBook();
+
+            showScreen('quiz-screen');
+            const data = gameData[type];
+            const current = data[Math.floor(Math.random() * data.length)];
+            currentQuizCorrect = current;
+
+            const promptEl = document.getElementById('quiz-prompt');
+            const visualEl = document.getElementById('quiz-visual');
+            const optionsEl = document.getElementById('quiz-options');
+
+            optionsEl.innerHTML = '';
+            visualEl.innerText = '';
+
+            let promptText = "";
+
+            if (type === 'abc') {
+                promptText = `Tap the letter ${current.name}`;
+                visualEl.innerText = '❓';
+            } else if (type === 'numbers') {
+                promptText = `How many flowers?`;
+                visualEl.innerText = current.visual;
+            } else if (type === 'colors') {
+                promptText = `Find the color ${current.name}`;
+                visualEl.innerText = current.item;
+            } else if (type === 'shapes') {
+                promptText = `Find the ${current.name}`;
+                visualEl.innerText = '❓';
+            } else if (type === 'animals') {
+                promptText = `Tap the ${current.name}`;
+                visualEl.innerText = '❓';
+            } else if (type === 'fruits') {
+                promptText = `Tap the ${current.name}`;
+                visualEl.innerText = '❓';
+            }
+
+            promptEl.innerText = promptText;
+            speak(promptText);
+
+            // Generate options
+            let options = [current];
+            while (options.length < Math.min(3, data.length)) {
+                let randomItem = data[Math.floor(Math.random() * data.length)];
+                if (!options.includes(randomItem)) options.push(randomItem);
+            }
+            options.sort(() => Math.random() - 0.5);
+
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn';
+                btn.innerText = opt.item || opt.name;
+                btn.onclick = () => handleQuizAnswer(opt, current, type);
+                optionsEl.appendChild(btn);
+            });
+        }
+
+        function handleQuizAnswer(selected, correct, type) {
+            if (selected === correct) {
+                playSound('correct');
+                if(type === 'animals') speak(`${correct.name} says ${correct.sound}`);
+                else speak(`Great job! That is ${correct.name || correct.item}`);
+                addRewards(1, 2);
+                setTimeout(() => startActivity(type), 1500);
+            } else {
+                playSound('wrong');
+                speak("Try again!");
+            }
+        }
+
+        /* ==========================================================================
+           6. MINI PUZZLE GAME
+           ========================================================================== */
+        function setupPuzzleGame() {
+            showScreen('puzzle-screen');
+            speak("Drag the pieces into place!");
+            
+            const piecesContainer = document.getElementById('puzzle-pieces');
+            const board = document.getElementById('puzzle-board');
+            piecesContainer.innerHTML = '';
+            board.innerHTML = '';
+
+            const puzzleItems = ['👑', '🦄', '🎀', '💎'];
+            let solvedCount = 0;
+
+            // Create board slots
+            puzzleItems.forEach((item, idx) => {
+                const slot = document.createElement('div');
+                slot.className = 'puzzle-slot';
+                slot.dataset.item = item;
+                slot.ondragover = e => e.preventDefault();
+                slot.ondrop = (e) => {
+                    e.preventDefault();
+                    const draggedItem = e.dataTransfer.getData('text');
+                    if (draggedItem === item && !slot.hasChildNodes()) {
+                        const piece = document.getElementById(`puzzle-${idx}`);
+                        slot.appendChild(piece);
+                        solvedCount++;
+                        playSound('correct');
+                        if (solvedCount === puzzleItems.length) {
+                            speak("Puzzle complete! You are amazing!");
+                            addRewards(3, 5);
+                        }
+                    } else {
+                        playSound('wrong');
+                    }
+                };
+                board.appendChild(slot);
+            });
+
+            // Create draggable pieces
+            puzzleItems.slice().sort(() => Math.random() - 0.5).forEach((item, idx) => {
+                const originalIndex = puzzleItems.indexOf(item);
+                const piece = document.createElement('div');
+                piece.className = 'puzzle-piece';
+                piece.id = `puzzle-${originalIndex}`;
+                piece.draggable = true;
+                piece.innerText = item;
+                piece.ondragstart = (e) => {
+                    e.dataTransfer.setData('text', item);
+                };
+                piecesContainer.appendChild(piece);
+            });
+        }
+
+        /* ==========================================================================
+           7. MEMORY MATCH GAME
+           ========================================================================== */
+        let memoryFlipped = [];
+        let memoryMatched = 0;
+
+        function setupMemoryGame() {
+            showScreen('memory-screen');
+            speak("Find the matching pairs!");
+            const board = document.getElementById('memory-board');
+            board.innerHTML = '';
+            memoryFlipped = [];
+            memoryMatched = 0;
+
+            const icons = ['🐱', '🐰', '🦄', '👑'];
+            const cards = [...icons, ...icons].sort(() => Math.random() - 0.5);
+
+            cards.forEach((icon, index) => {
+                const card = document.createElement('div');
+                card.className = 'memory-card';
+                card.dataset.icon = icon;
+                card.dataset.index = index;
+                card.innerText = '❓';
+                card.onclick = () => handleMemoryFlip(card);
+                board.appendChild(card);
+            });
+        }
+
+        function handleMemoryFlip(card) {
+            if (memoryFlipped.length < 2 && !card.classList.contains('flipped')) {
+                playSound('click');
+                card.classList.add('flipped');
+                card.innerText = card.dataset.icon;
+                memoryFlipped.push(card);
+
+                if (memoryFlipped.length === 2) {
+                    const [c1, c2] = memoryFlipped;
+                    if (c1.dataset.icon === c2.dataset.icon) {
+                        playSound('correct');
+                        memoryMatched++;
+                        memoryFlipped = [];
+                        if (memoryMatched === 4) {
+                            speak("You matched all cards!");
+                            addRewards(2, 4);
+                        }
+                    } else {
+                        playSound('wrong');
+                        setTimeout(() => {
+                            c1.classList.remove('flipped');
+                            c2.classList.remove('flipped');
+                            c1.innerText = '❓';
+                            c2.innerText = '❓';
+                            memoryFlipped = [];
+                        }, 1000);
+                    }
+                }
+            }
+        }
+
+        /* ==========================================================================
+           8. BALLOON POP GAME
+           ========================================================================== */
+        let balloonInterval = null;
+        let targetBalloonLetter = 'A';
+
+        function setupBalloonGame() {
+            showScreen('balloon-screen');
+            const targetLetters = ['A', 'B', 'C', '1', '2', '3'];
+            targetBalloonLetter = targetLetters[Math.floor(Math.random() * targetLetters.length)];
+            
+            document.getElementById('balloon-prompt').innerText = `Pop the Balloon with: ${targetBalloonLetter}`;
+            speak(`Pop the Balloon with ${targetBalloonLetter}`);
+
+            const container = document.getElementById('balloon-canvas');
+            container.innerHTML = '';
+
+            if (balloonInterval) clearInterval(balloonInterval);
+
+            balloonInterval = setInterval(() => {
+                createBalloon(container, targetLetters);
+            }, 1200);
+        }
+
+        function createBalloon(container, letters) {
+            const balloon = document.createElement('div');
+            balloon.className = 'balloon';
+            
+            const randomLetter = Math.random() > 0.4 ? targetBalloonLetter : letters[Math.floor(Math.random() * letters.length)];
+            balloon.innerText = randomLetter;
+            
+            // Random pastel colors
+            const colors = ['#FF85A2', '#FFD166', '#A2D2FF', '#CAFFBF', '#B5179E'];
+            balloon.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            balloon.style.left = `${Math.random() * 80 + 10}%`;
+
+            balloon.onclick = () => {
+                if (balloon.innerText === targetBalloonLetter) {
+                    playSound('pop');
+                    addRewards(1, 1);
+                    balloon.remove();
+                } else {
+                    playSound('wrong');
+                }
+            };
+
+            container.appendChild(balloon);
+
+            // Auto cleanup after animation ends
+            setTimeout(() => {
+                if (balloon.parentNode) balloon.remove();
+            }, 6000);
+        }
+
+        /* ==========================================================================
+           9. REWARDS & STICKER BOOK
+           ========================================================================== */
+        const allStickers = [
+            { id: 1, icon: '👑', name: 'Princess Crown', cost: 5 },
+            { id: 2, icon: '🦄', name: 'Magical Unicorn', cost: 10 },
+            { id: 3, icon: '🏰', name: 'Fairy Castle', cost: 15 },
+            { id: 4, icon: '🌈', name: 'Rainbow', cost: 20 },
+            { id: 5, icon: '💎', name: 'Magic Diamond', cost: 25 }
+        ];
+
+        function setupStickerBook() {
+            showScreen('rewards-screen');
+            const grid = document.getElementById('sticker-grid');
+            grid.innerHTML = '';
+
+            allStickers.forEach(sticker => {
+                const isUnlocked = gameState.stickersUnlocked.includes(sticker.id);
+                const card = document.createElement('div');
+                card.className = 'activity-card';
+                card.style.width = '120px';
+                
+                card.innerHTML = `
+                    <div class="icon">${isUnlocked ? sticker.icon : '🔒'}</div>
+                    <div class="label">${sticker.name}</div>
+                    <div style="font-size:0.8rem; margin-top:5px;">
+                        ${isUnlocked ? 'Unlocked!' : `🪙 ${sticker.cost}`}
+                    </div>
+                `;
+
+                if (!isUnlocked) {
+                    card.onclick = () => buySticker(sticker);
+                }
+                grid.appendChild(card);
+            });
+        }
+
+        function buySticker(sticker) {
+            if (gameState.coins >= sticker.cost) {
+                gameState.coins -= sticker.cost;
+                gameState.stickersUnlocked.push(sticker.id);
+                saveProgress();
+                playSound('correct');
+                speak(`You unlocked the ${sticker.name}!`);
+                setupStickerBook();
+            } else {
+                playSound('wrong');
+                speak("You need more coins!");
+            }
+        }
+
+        /* ==========================================================================
+           10. VISUAL PARTICLES & CONFETTI SYSTEM
+           ========================================================================== */
+        const canvas = document.getElementById('effect-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function triggerConfetti() {
+            for (let i = 0; i < 50; i++) {
+                particles.push({
+                    x: canvas.width / 2,
+                    y: canvas.height / 2,
+                    vx: (Math.random() - 0.5) * 12,
+                    vy: (Math.random() - 0.5) * 12 - 4,
+                    color: ['#FF85A2', '#FFD166', '#A2D2FF', '#CAFFBF', '#B5179E'][Math.floor(Math.random() * 5)],
+                    size: Math.random() * 8 + 4,
+                    life: 100
+                });
+            }
+        }
+
+        function updateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach((p, index) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.2; // Gravity
+                p.life--;
+
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+
+                if (p.life <= 0) particles.splice(index, 1);
+            });
+            requestAnimationFrame(updateParticles);
+        }
+        updateParticles();
+
+        /* ==========================================================================
+           11. PARENTS GATE & RESET OPTION
+           ========================================================================== */
+        let parentMathAns = 0;
+
+        function openParentsModal() {
+            playSound('click');
+            const num1 = Math.floor(Math.random() * 5) + 5;
+            const num2 = Math.floor(Math.random() * 5) + 1;
+            parentMathAns = num1 + num2;
+            
+            document.getElementById('math-problem').innerText = `${num1} + ${num2} = ?`;
+            document.getElementById('math-answer').value = '';
+            document.getElementById('parents-modal').style.display = 'flex';
+        }
+
+        function closeParentsModal() {
+            document.getElementById('parents-modal').style.display = 'none';
+        }
+
+        function verifyParentsGate() {
+            const input = parseInt(document.getElementById('math-answer').value, 10);
+            if (input === parentMathAns) {
+                if (confirm("Grown-ups area: Would you like to reset all game progress?")) {
+                    localStorage.removeItem('princess_game_save');
+                    gameState.stars = 0;
+                    gameState.coins = 0;
+                    gameState.stickersUnlocked = [];
+                    updateStatsUI();
+                    alert("Game progress has been reset.");
+                }
+                closeParentsModal();
+            } else {
+                alert("Incorrect answer.");
+                closeParentsModal();
+            }
+        }
+
+        // Initialize on page load
+        window.onload = () => {
+            loadSavedProgress();
+        };
+    </script>
+</body>
+</html>
